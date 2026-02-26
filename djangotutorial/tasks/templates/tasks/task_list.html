@@ -1,0 +1,85 @@
+{% extends "tasks/base.html" %}
+
+{% block title %}TaskFlow — Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <a href="{% url 'tasks:list' %}" class="stat-card stat-total {% if not current_status %}active{% endif %}">
+        <div class="stat-number">{{ total_count }}</div>
+        <div class="stat-label">Total Tasks</div>
+    </a>
+    <a href="{% url 'tasks:list' %}?status=TODO"
+        class="stat-card stat-todo {% if current_status == 'TODO' %}active{% endif %}">
+        <div class="stat-number">{{ todo_count }}</div>
+        <div class="stat-label">To Do</div>
+    </a>
+    <a href="{% url 'tasks:list' %}?status=IN_PROGRESS"
+        class="stat-card stat-progress {% if current_status == 'IN_PROGRESS' %}active{% endif %}">
+        <div class="stat-number">{{ in_progress_count }}</div>
+        <div class="stat-label">In Progress</div>
+    </a>
+    <a href="{% url 'tasks:list' %}?status=DONE"
+        class="stat-card stat-done {% if current_status == 'DONE' %}active{% endif %}">
+        <div class="stat-number">{{ done_count }}</div>
+        <div class="stat-label">Done</div>
+    </a>
+</div>
+
+<!-- Priority Filter -->
+<div class="filter-bar">
+    <span class="filter-label">Priority:</span>
+    <a href="{% url 'tasks:list' %}{% if current_status %}?status={{ current_status }}{% endif %}"
+        class="filter-chip {% if not current_priority %}active{% endif %}">All</a>
+    <a href="{% url 'tasks:list' %}?priority=HIGH{% if current_status %}&status={{ current_status }}{% endif %}"
+        class="filter-chip filter-high {% if current_priority == 'HIGH' %}active{% endif %}">High</a>
+    <a href="{% url 'tasks:list' %}?priority=MEDIUM{% if current_status %}&status={{ current_status }}{% endif %}"
+        class="filter-chip filter-medium {% if current_priority == 'MEDIUM' %}active{% endif %}">Medium</a>
+    <a href="{% url 'tasks:list' %}?priority=LOW{% if current_status %}&status={{ current_status }}{% endif %}"
+        class="filter-chip filter-low {% if current_priority == 'LOW' %}active{% endif %}">Low</a>
+</div>
+
+<!-- Task List -->
+{% if tasks %}
+<div class="task-list">
+    {% for task in tasks %}
+    <div class="task-card {% if task.is_overdue %}overdue{% endif %}">
+        <div class="task-header">
+            <a href="{% url 'tasks:detail' task.pk %}" class="task-title">{{ task.title }}</a>
+            <div class="task-badges">
+                <span class="badge badge-priority-{{ task.priority|lower }}">{{ task.get_priority_display }}</span>
+                <span class="badge badge-status-{{ task.status|lower }}">{{ task.get_status_display }}</span>
+            </div>
+        </div>
+        {% if task.description %}
+        <p class="task-desc">{{ task.description|truncatewords:20 }}</p>
+        {% endif %}
+        <div class="task-footer">
+            <div class="task-meta">
+                {% if task.due_date %}
+                <span class="meta-item {% if task.is_overdue %}text-danger{% endif %}">
+                    📅 {{ task.due_date|date:"M d, Y" }}
+                </span>
+                {% endif %}
+                <span class="meta-item">🕐 {{ task.created_at|date:"M d" }}</span>
+            </div>
+            <div class="task-actions">
+                <a href="{% url 'tasks:toggle' task.pk %}" class="btn btn-sm btn-toggle" title="Toggle status">⟳</a>
+                <a href="{% url 'tasks:edit' task.pk %}" class="btn btn-sm btn-edit" title="Edit">✎</a>
+                <a href="{% url 'tasks:delete' task.pk %}" class="btn btn-sm btn-delete" title="Delete">✕</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">📋</div>
+    <h2>No tasks yet</h2>
+    <p>Start by creating your first task!</p>
+    <a href="{% url 'tasks:create' %}" class="btn btn-primary btn-glow">
+        <span class="btn-icon">＋</span> Create Task
+    </a>
+</div>
+{% endif %}
+{% endblock %}

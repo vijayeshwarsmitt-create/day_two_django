@@ -1,0 +1,56 @@
+{% extends "tasks/base.html" %}
+
+{% block title %}{{ task.title }} — TaskFlow{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+    <div class="detail-card glass-card">
+        <div class="detail-header">
+            <h1 class="detail-title">{{ task.title }}</h1>
+            <div class="task-badges">
+                <span class="badge badge-priority-{{ task.priority|lower }}">{{ task.get_priority_display }}</span>
+                <span class="badge badge-status-{{ task.status|lower }}">{{ task.get_status_display }}</span>
+            </div>
+        </div>
+
+        {% if task.description %}
+        <div class="detail-section">
+            <h3 class="section-label">Description</h3>
+            <p class="detail-text">{{ task.description|linebreaksbr }}</p>
+        </div>
+        {% endif %}
+
+        <div class="detail-meta-grid">
+            <div class="detail-meta-item">
+                <span class="meta-label">Priority</span>
+                <span class="meta-value">{{ task.get_priority_display }}</span>
+            </div>
+            <div class="detail-meta-item">
+                <span class="meta-label">Status</span>
+                <span class="meta-value">{{ task.get_status_display }}</span>
+            </div>
+            <div class="detail-meta-item">
+                <span class="meta-label">Created</span>
+                <span class="meta-value">{{ task.created_at|date:"M d, Y · h:i A" }}</span>
+            </div>
+            <div class="detail-meta-item">
+                <span class="meta-label">Updated</span>
+                <span class="meta-value">{{ task.updated_at|date:"M d, Y · h:i A" }}</span>
+            </div>
+            {% if task.due_date %}
+            <div class="detail-meta-item {% if task.is_overdue %}overdue{% endif %}">
+                <span class="meta-label">Due Date</span>
+                <span class="meta-value">{{ task.due_date|date:"M d, Y" }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="detail-actions">
+            <a href="{% url 'tasks:toggle' task.pk %}" class="btn btn-primary">⟳ Toggle Status</a>
+            <a href="{% url 'tasks:edit' task.pk %}" class="btn btn-secondary">✎ Edit</a>
+            <a href="{% url 'tasks:delete' task.pk %}" class="btn btn-danger">✕ Delete</a>
+            <a href="{% url 'tasks:list' %}" class="btn btn-ghost">← Back</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
